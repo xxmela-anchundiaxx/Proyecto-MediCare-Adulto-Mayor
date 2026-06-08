@@ -1,0 +1,8 @@
+.medicare.db
+.vscode/
+.idea/
+*.log
+*.db
+*.sql
+*.sqlite
+*.sqlite3
