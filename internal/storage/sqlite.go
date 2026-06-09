@@ -40,7 +40,6 @@ func (a *AlmacenSQLite) SembrarVacioMedicacion() {
     if n == 0 {
         medicaciones := []models.Medicacion{
             {
-                PacienteID:         1,
                 Nombre:             "Paracetamol",
                 Descripcion:        "Analgésico y antipirético",
                 Dosis:              "500mg",
@@ -50,7 +49,6 @@ func (a *AlmacenSQLite) SembrarVacioMedicacion() {
                 Fecha_creacion:     time.Now(),
             },
             {
-                PacienteID:         2,
                 Nombre:             "Ibuprofeno",
                 Descripcion:        "Antiinflamatorio no esteroideo",
                 Dosis:              "400mg",
@@ -60,7 +58,6 @@ func (a *AlmacenSQLite) SembrarVacioMedicacion() {
                 Fecha_creacion:     time.Now(),
             },
             {
-                PacienteID:         3,
                 Nombre:             "Amoxicilina",
                 Descripcion:        "Antibiótico de amplio espectro",
                 Dosis:              "500mg",

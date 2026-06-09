@@ -4,7 +4,6 @@ import "time"
 
 type Medicacion struct {
 	ID                  int         `json:"id"`
-	PacienteID          int         `json:"paciente_id"`
 	Nombre              string      `json:"nombre"`
 	Descripcion         string      `json:"descripcion"`
 	Dosis               string      `json:"dosis"`

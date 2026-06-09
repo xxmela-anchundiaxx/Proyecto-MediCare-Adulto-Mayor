@@ -48,7 +48,7 @@ func main() {
         r.Get("/medicaciones", servidor.ListarMedicacion)
         r.Post("/medicaciones", servidor.CrearMedicacion)
         r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
-        // r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
+        //r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
         // r.Delete("/medicaciones/{id}", servidor.BorrarMedicacion)
     }) 
 
