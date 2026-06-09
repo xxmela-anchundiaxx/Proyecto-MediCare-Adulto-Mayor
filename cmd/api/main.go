@@ -46,12 +46,11 @@ func main() {
     // 7. Rutas versionadas /api/v1/
     r.Route("/api/v1", func(r chi.Router) {
         r.Get("/medicaciones", servidor.ListarMedicacion)
-        // Más adelante podrás añadir:
         r.Post("/medicaciones", servidor.CrearMedicacion)
-        // r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
+        r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
         // r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
         // r.Delete("/medicaciones/{id}", servidor.BorrarMedicacion)
-    })
+    }) 
 
     log.Println("Servidor escuchando en http://localhost:8080")
     log.Fatal(http.ListenAndServe(":8080", r))

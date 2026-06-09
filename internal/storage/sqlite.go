@@ -25,6 +25,13 @@ func (a *AlmacenSQLite) CrearMedicacion(m models.Medicacion) (models.Medicacion,
     return m, result.Error
 }
 
+func (a *AlmacenSQLite) BuscarMedicacionPorID(id int) (models.Medicacion, error) {
+	var medicacion models.Medicacion
+	if err := a.db.First(&medicacion, id).Error; err != nil {
+        return models.Medicacion{}, err
+    }
+    return medicacion, nil
+}
 
 func (a *AlmacenSQLite) SembrarVacioMedicacion() {
     var n int64
