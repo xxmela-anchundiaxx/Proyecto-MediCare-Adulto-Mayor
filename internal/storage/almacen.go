@@ -12,3 +12,5 @@ type Almacen interface {
 	ActualizarMedicacion(id int, medicacion models.Medicacion) (models.Medicacion, error)
 	//EliminarMedicacion(id int) (bool, error)
 }
+
+
