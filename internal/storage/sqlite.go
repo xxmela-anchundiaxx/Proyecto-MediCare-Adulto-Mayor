@@ -33,6 +33,19 @@ func (a *AlmacenSQLite) BuscarMedicacionPorID(id int) (models.Medicacion, error)
     return medicacion, nil
 }
 
+func (a *AlmacenSQLite) ActualizarMedicacion(id int, datos models.Medicacion) (models.Medicacion, error) {
+    var medicacion models.Medicacion
+    if err := a.db.First(&medicacion, id).Error; err != nil {
+        return models.Medicacion{}, err
+    }
+    datos.ID = medicacion.ID
+    if err := a.db.Save(&datos).Error; err != nil {
+        return models.Medicacion{}, err
+    }
+    return datos, nil
+}
+
+
 func (a *AlmacenSQLite) SembrarVacioMedicacion() {
     var n int64
     a.db.Model(&models.Medicacion{}).Count(&n)

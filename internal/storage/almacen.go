@@ -9,6 +9,6 @@ type Almacen interface {
 	ListarMedicacion() ([]models.Medicacion, error)
 	BuscarMedicacionPorID(id int) (models.Medicacion, error)
 	CrearMedicacion(medicacion models.Medicacion) (models.Medicacion, error)
-	ActualizarMedicacion(id int, medicacion models.Medicacion) (models.Medicacion,bool, error)
+	ActualizarMedicacion(id int, medicacion models.Medicacion) (models.Medicacion, error)
 	//EliminarMedicacion(id int) (bool, error)
 }

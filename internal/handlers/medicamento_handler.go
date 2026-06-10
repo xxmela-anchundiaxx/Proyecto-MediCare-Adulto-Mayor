@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
-	"time"
+	"time"          
+    "gorm.io/gorm" 
 
 	"proyecto-medicare-adulto-mayor/internal/models"
 	"proyecto-medicare-adulto-mayor/internal/storage"
@@ -85,22 +87,20 @@ func (s *MedicamentoHandler) CrearMedicacion(w http.ResponseWriter, r *http.Requ
     RespondJSON(w, http.StatusCreated, creada)
 }
 
+//ActualizarMedicacion PUT /api/v1/medicaciones/{id}
 func (s *MedicamentoHandler) ActualizarMedicacion(w http.ResponseWriter, r *http.Request) {
-    // 1. Obtener el ID desde la URL
     id, err := strconv.Atoi(chi.URLParam(r, "id"))
     if err != nil {
         RespondError(w, http.StatusBadRequest, "ID inválido")
         return
     }
 
-    // 2. Decodificar el JSON recibido
     var datos models.Medicacion
     if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
         RespondError(w, http.StatusBadRequest, "Datos de medicación inválidos: "+err.Error())
         return
     }
 
-    // 3. Validaciones básicas
     if strings.TrimSpace(datos.Nombre) == "" {
         RespondError(w, http.StatusBadRequest, "El nombre de la medicación es requerido")
         return
@@ -118,14 +118,16 @@ func (s *MedicamentoHandler) ActualizarMedicacion(w http.ResponseWriter, r *http
         return
     }
 
-    // 4. Actualizar en la base de datos
     actualizado, err := s.Storage.ActualizarMedicacion(id, datos)
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        RespondError(w, http.StatusNotFound, "Medicacion no encontrada")
+        return
+    }
     if err != nil {
         RespondError(w, http.StatusInternalServerError, "Error al actualizar medicación")
         return
     }
 
-    // 5. Responder con el objeto actualizado
     RespondJSON(w, http.StatusOK, actualizado)
 }
 
