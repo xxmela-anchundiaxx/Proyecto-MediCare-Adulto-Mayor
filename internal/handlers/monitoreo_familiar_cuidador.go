@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/xxmela-anchundiaxx/Proyecto-MediCare-Adulto-Mayor/internal/models"
 	"github.com/xxmela-anchundiaxx/Proyecto-MediCare-Adulto-Mayor/internal/storage"
@@ -33,4 +34,27 @@ func ObtenerRelacionesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(relaciones)
+}
+
+func ObtenerRelacionPorIDHandler(w http.ResponseWriter, r *http.Request) {
+
+	idStr := r.URL.Query().Get("id")
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		http.Error(w, "ID invalido", http.StatusBadRequest)
+		return
+	}
+
+	relacion, encontrado := storage.ObtenerRelacionPorID(id)
+
+	if !encontrado {
+		http.Error(w, "Relacion no encontrada", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(relacion)
 }
