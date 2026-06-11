@@ -25,3 +25,12 @@ func CrearRelacionHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(relacion)
 }
+
+func ObtenerRelacionesHandler(w http.ResponseWriter, r *http.Request) {
+
+	relaciones := storage.ObtenerRelaciones()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(relaciones)
+}
