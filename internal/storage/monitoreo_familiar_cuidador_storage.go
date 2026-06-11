@@ -32,3 +32,14 @@ func ActualizarRelacion(id int, nuevaRelacion models.CuidadorPaciente) bool {
 
 	return false
 }
+
+func EliminarRelacion(id int) bool {
+	for i, relacion := range Relaciones {
+		if relacion.ID == id {
+			Relaciones = append(Relaciones[:i], Relaciones[i+1:]...)
+			return true
+		}
+	}
+
+	return false
+}
