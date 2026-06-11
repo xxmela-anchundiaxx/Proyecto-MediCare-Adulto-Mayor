@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-    // 1. Conexión a SQLite
+    // 1. Conexión a SQLite medicacion.db
     db, err := gorm.Open(sqlite.Open("medicare.db"), &gorm.Config{})
     if err != nil {
         log.Fatal("No se pudo conectar a la base de datos:", err)
@@ -30,7 +30,7 @@ func main() {
     // 3. Crear almacenamiento y sembrar datos iniciales
     almacen := storage.NewAlmacenSQLite(db)
     almacen.SembrarVacioMedicacion()
-
+    
     // 4. Crear el handler inyectando el almacenamiento
     servidor := handlers.NewMedicamentoHandler(almacen)
 
@@ -44,11 +44,13 @@ func main() {
 
     // 7. Rutas versionadas /api/v1/
     r.Route("/api/v1", func(r chi.Router) {
+        // Rutas para medicacion
         r.Get("/medicaciones", servidor.ListarMedicacion)
         r.Post("/medicaciones", servidor.CrearMedicacion)
         r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
         r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
         r.Delete("/medicaciones/{id}", servidor.EliminarMedicacion)
+
     }) 
 
     log.Println("Servidor escuchando en http://localhost:8080")

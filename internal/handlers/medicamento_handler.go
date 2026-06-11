@@ -65,10 +65,17 @@ func (s *MedicamentoHandler) CrearMedicacion(w http.ResponseWriter, r *http.Requ
         RespondError(w, http.StatusBadRequest, "La dosis de la medicación es requerida")
         return
     }
-    if nueva.ID <= 0 {
-        RespondError(w, http.StatusBadRequest, "El ID de la medicación debe ser un número positivo válido")
+
+    if strings.TrimSpace(nueva.Frecuencia) == "" {
+        RespondError(w, http.StatusBadRequest, "La frecuencia de la medicación es requerida")
         return
     }
+
+    if strings.TrimSpace(nueva.Hora_programada) == "" {
+        RespondError(w, http.StatusBadRequest, "La hora programada de la medicación es requerida")
+        return
+    }
+
     if nueva.Inicio_tratamiento.IsZero() {
         RespondError(w, http.StatusBadRequest, "La fecha de inicio del tratamiento es requerida")
         return
