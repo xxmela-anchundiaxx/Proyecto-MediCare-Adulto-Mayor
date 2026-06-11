@@ -11,3 +11,13 @@ func CrearRelacion(relacion models.CuidadorPaciente) {
 func ObtenerRelaciones() []models.CuidadorPaciente {
 	return Relaciones
 }
+
+func ObtenerRelacionPorID(id int) (models.CuidadorPaciente, bool) {
+	for _, relacion := range Relaciones {
+		if relacion.ID == id {
+			return relacion, true
+		}
+	}
+
+	return models.CuidadorPaciente{}, false
+}
