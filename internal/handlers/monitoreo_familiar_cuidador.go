@@ -90,3 +90,28 @@ func ActualizarRelacionHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(nuevaRelacion)
 }
+
+func EliminarRelacionHandler(w http.ResponseWriter, r *http.Request) {
+
+	idStr := r.URL.Query().Get("id")
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		http.Error(w, "ID invalido", http.StatusBadRequest)
+		return
+	}
+
+	eliminado := storage.EliminarRelacion(id)
+
+	if !eliminado {
+		http.Error(w, "Relacion no encontrada", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"mensaje": "Relacion eliminada correctamente",
+	})
+}
