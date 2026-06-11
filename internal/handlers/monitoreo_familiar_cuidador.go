@@ -58,3 +58,35 @@ func ObtenerRelacionPorIDHandler(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(relacion)
 }
+
+func ActualizarRelacionHandler(w http.ResponseWriter, r *http.Request) {
+
+	idStr := r.URL.Query().Get("id")
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		http.Error(w, "ID invalido", http.StatusBadRequest)
+		return
+	}
+
+	var nuevaRelacion models.CuidadorPaciente
+
+	err = json.NewDecoder(r.Body).Decode(&nuevaRelacion)
+
+	if err != nil {
+		http.Error(w, "Datos invalidos", http.StatusBadRequest)
+		return
+	}
+
+	actualizado := storage.ActualizarRelacion(id, nuevaRelacion)
+
+	if !actualizado {
+		http.Error(w, "Relacion no encontrada", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(nuevaRelacion)
+}
