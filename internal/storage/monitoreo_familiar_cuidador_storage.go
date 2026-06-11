@@ -7,3 +7,7 @@ var Relaciones []models.CuidadorPaciente
 func CrearRelacion(relacion models.CuidadorPaciente) {
 	Relaciones = append(Relaciones, relacion)
 }
+
+func ObtenerRelaciones() []models.CuidadorPaciente {
+	return Relaciones
+}
