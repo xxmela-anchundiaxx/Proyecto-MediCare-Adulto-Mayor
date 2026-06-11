@@ -21,3 +21,14 @@ func ObtenerRelacionPorID(id int) (models.CuidadorPaciente, bool) {
 
 	return models.CuidadorPaciente{}, false
 }
+
+func ActualizarRelacion(id int, nuevaRelacion models.CuidadorPaciente) bool {
+	for i, relacion := range Relaciones {
+		if relacion.ID == id {
+			Relaciones[i] = nuevaRelacion
+			return true
+		}
+	}
+
+	return false
+}
