@@ -131,3 +131,25 @@ func (s *MedicamentoHandler) ActualizarMedicacion(w http.ResponseWriter, r *http
     RespondJSON(w, http.StatusOK, actualizado)
 }
 
+//EliminarMedicacion DELETE /api/v1/medicaciones/{id}
+func (s *MedicamentoHandler) EliminarMedicacion(w http.ResponseWriter, r *http.Request) {
+    id, err := strconv.Atoi(chi.URLParam(r, "id"))
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    ok, err := s.Storage.EliminarMedicacion(id)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al eliminar medicacion")
+        return
+    }
+
+    if !ok {
+        RespondError(w, http.StatusNotFound, "Medicacion no encontrada")
+        return
+    }
+
+    RespondJSON(w, http.StatusOK, map[string]interface{}{"message": "Medicacion eliminada correctamente"})
+}
+

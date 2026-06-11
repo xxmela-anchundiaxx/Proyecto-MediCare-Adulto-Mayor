@@ -48,7 +48,7 @@ func main() {
         r.Post("/medicaciones", servidor.CrearMedicacion)
         r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
         r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
-        // r.Delete("/medicaciones/{id}", servidor.BorrarMedicacion)
+        r.Delete("/medicaciones/{id}", servidor.EliminarMedicacion)
     }) 
 
     log.Println("Servidor escuchando en http://localhost:8080")

@@ -45,6 +45,21 @@ func (a *AlmacenSQLite) ActualizarMedicacion(id int, datos models.Medicacion) (m
     return datos, nil
 }
 
+func (a *AlmacenSQLite) EliminarMedicacion(id int) (bool, error) {
+    result := a.db.Delete(&models.Medicacion{}, id)
+
+    if result.Error != nil {
+        // Error al ejecutar el DELETE
+        return false, result.Error
+    }
+
+    if result.RowsAffected == 0 {
+        return false, nil
+    }
+    return true, nil
+}
+
+
 
 func (a *AlmacenSQLite) SembrarVacioMedicacion() {
     var n int64
