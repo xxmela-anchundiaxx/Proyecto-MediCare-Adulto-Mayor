@@ -8,8 +8,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
-
+//funciones del proyecto
 func main() {
+	// Crea una nueva instancia del router Chi
 	r := chi.NewRouter()
 
 	r.Post("/api/v1/farmacia", handlers.CreateMedicamento)
