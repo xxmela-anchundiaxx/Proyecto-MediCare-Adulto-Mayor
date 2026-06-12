@@ -1,3 +1,4 @@
+//Aqui va la parte del json 
 package models
 
 type Medicamento_farmacia struct {
