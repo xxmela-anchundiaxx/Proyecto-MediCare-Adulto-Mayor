@@ -51,6 +51,19 @@ func main() {
         r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
         r.Delete("/medicaciones/{id}", servidor.EliminarMedicacion)
 
+        r.Post("/medicamentos_farmacia", handlers.CreateMedicamento)
+	    r.Get("/medicamentos_farmacia", handlers.GetMedicamentos)
+	    r.Get("/medicamentos_farmacia/{id}", handlers.GetMedicamento)
+	    r.Put("/medicamentos_farmacia/{id}", handlers.UpdateMedicamento)
+	    r.Delete("/medicamentos_farmacia/{id}", handlers.DeleteMedicamento)
+
+        // Monitoreo familiar/cuidador (memoria)
+        r.Post("/relaciones", handlers.CrearRelacionHandler)
+        r.Get("/relaciones", handlers.ObtenerRelacionesHandler)
+        r.Get("/relaciones/{id}", handlers.ObtenerRelacionPorIDHandler)
+        r.Put("/relaciones/{id}", handlers.ActualizarRelacionHandler)
+        r.Delete("/relaciones/{id}", handlers.EliminarRelacionHandler)
+
     }) 
 
     log.Println("Servidor escuchando en http://localhost:8080")
