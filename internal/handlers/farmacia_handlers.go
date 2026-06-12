@@ -10,7 +10,7 @@ import (
 	"proyectodemedicare/internal/models"
 	"proyectodemedicare/internal/storage"
 )
-
+//Aqui van las funciones que hace mi modulo
 func CreateMedicamento(w http.ResponseWriter, r *http.Request) {
 
 	var medicamento models.Medicamento_farmacia
