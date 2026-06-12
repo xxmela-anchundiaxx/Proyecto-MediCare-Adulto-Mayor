@@ -1,3 +1,4 @@
+//Esta es la memoria temporal 
 package storage
 
 import "proyectodemedicare/internal/models"
