@@ -61,6 +61,7 @@ func (s *MedicamentoHandler) CrearMedicacion(w http.ResponseWriter, r *http.Requ
         RespondError(w, http.StatusBadRequest, "El nombre de la medicación es requerido")
         return
     }
+
     if strings.TrimSpace(nueva.Dosis) == "" {
         RespondError(w, http.StatusBadRequest, "La dosis de la medicación es requerida")
         return
@@ -134,6 +135,7 @@ func (s *MedicamentoHandler) ActualizarMedicacion(w http.ResponseWriter, r *http
         RespondError(w, http.StatusInternalServerError, "Error al actualizar medicación")
         return
     }
+    
 
     RespondJSON(w, http.StatusOK, actualizado)
 }
@@ -158,5 +160,236 @@ func (s *MedicamentoHandler) EliminarMedicacion(w http.ResponseWriter, r *http.R
     }
 
     RespondJSON(w, http.StatusOK, map[string]interface{}{"message": "Medicacion eliminada correctamente"})
+}
+
+
+//metodos de pacientes
+type PacienteHandler struct {
+    Storage storage.Almacen
+}
+
+func NewPacienteHandler(s storage.Almacen) *PacienteHandler{
+    return &PacienteHandler{Storage: s}
+}
+
+// ListarPaciente GET api/v1/pacientes
+func (h *PacienteHandler) ListarPacientes(w http.ResponseWriter, r *http.Request) {
+    pacientes, err := h.Storage.ListarPacientes()
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al listar pacientes")
+        return
+    }
+    RespondJSON(w, http.StatusOK, pacientes)
+}
+
+// BuscarPaciente por ID GET api/v1/pacientes/{id}
+func (h *PacienteHandler) BuscarPacientePorID(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    paciente, err := h.Storage.BuscarPacientePorID(id)
+    if err != nil {
+        RespondError(w, http.StatusNotFound, "Paciente no encontrado")
+        return
+    }
+    RespondJSON(w, http.StatusOK, paciente)
+}
+
+// CrearPaciente POST api/v1/pacientes
+func (h *PacienteHandler) CrearPaciente(w http.ResponseWriter, r *http.Request) {
+    var p models.Paciente
+    if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+        RespondError(w, http.StatusBadRequest, "JSON inválido")
+        return
+    }
+
+    nuevo, err := h.Storage.CrearPaciente(p)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al crear paciente")
+        return
+    }
+    RespondJSON(w, http.StatusCreated, nuevo)
+}
+
+// ActualzarPaciente PUT api/v1/pacientes/{id}
+func (h *PacienteHandler) ActualizarPaciente(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    var p models.Paciente
+    if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+        RespondError(w, http.StatusBadRequest, "JSON inválido")
+        return
+    }
+
+    actualizado, err := h.Storage.ActualizarPaciente(id, p)
+    if err != nil {
+        // Si el error es que no existe el registro, puedes devolver 404
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            RespondError(w, http.StatusNotFound, "Paciente no encontrado")
+            return
+        }
+        RespondError(w, http.StatusInternalServerError, "Error al actualizar paciente")
+        return
+    }
+    RespondJSON(w, http.StatusOK, actualizado)
+}
+
+
+// EliminarPaciente DELETE api/v1/pacientes/{id}
+func (h *PacienteHandler) EliminarPaciente(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    ok, err := h.Storage.EliminarPaciente(id)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al eliminar paciente")
+        return
+    }
+    if !ok {
+        RespondError(w, http.StatusNotFound, "Paciente no encontrado")
+        return
+    }
+    RespondJSON(w, http.StatusNoContent, nil)
+}
+
+
+type HistorialHandler struct {
+    Storage storage.Almacen
+}
+
+func NewHistorialHandler(s storage.Almacen) *HistorialHandler {
+    return &HistorialHandler{Storage: s}
+}
+
+// ListarHistorial GET api/v1/historial
+func (h *HistorialHandler) ListarHistorial(w http.ResponseWriter, r *http.Request) {
+    historiales, err := h.Storage.ListarHistorial()
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al listar historiales")
+        return
+    }
+    RespondJSON(w, http.StatusOK, historiales)
+}
+
+// Buscarhistorial por ID GET api/v1/historial/{id}
+func (h *HistorialHandler) BuscarPorID(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    registro, err := h.Storage.BuscarHistorialPorID(id)
+    if err != nil {
+        RespondError(w, http.StatusNotFound, "Historial no encontrado")
+        return
+    }
+    RespondJSON(w, http.StatusOK, registro)
+}
+
+
+// CrearHistorial POST api/v1/historial
+func (h *HistorialHandler) Crear(w http.ResponseWriter, r *http.Request) {
+    var hMed models.HistorialMedicacion
+    if err := json.NewDecoder(r.Body).Decode(&hMed); err != nil {
+        RespondError(w, http.StatusBadRequest, "JSON inválido")
+        return
+    }
+
+    nuevo, err := h.Storage.CrearHistorial(hMed)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al crear historial")
+        return
+    }
+    RespondJSON(w, http.StatusCreated, nuevo)
+}
+
+// ActualizarHistorial PUT api/historial/{id}
+func (h *HistorialHandler) Actualizar(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    var datos models.HistorialMedicacion
+    if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+        RespondError(w, http.StatusBadRequest, "JSON inválido")
+        return
+    }
+
+    actualizado, err := h.Storage.ActualizarHistorial(id, datos)
+    if err != nil {
+        // Si el error es que no existe el registro
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            RespondError(w, http.StatusNotFound, "Historial no encontrado")
+            return
+        }
+        RespondError(w, http.StatusInternalServerError, "Error al actualizar historial")
+        return
+    }
+    RespondJSON(w, http.StatusOK, actualizado)
+}
+
+// EliminarHistorial DELETE api/v1/historial/{id}
+func (h *HistorialHandler) Eliminar(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        RespondError(w, http.StatusBadRequest, "ID inválido")
+        return
+    }
+
+    ok, err := h.Storage.EliminarHistorial(id)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al eliminar historial")
+        return
+    }
+    if !ok {
+        RespondError(w, http.StatusNotFound, "Historial no encontrado")
+        return
+    }
+    RespondJSON(w, http.StatusNoContent, nil)
+}
+
+// ObtenerMedicacion de un paciente GET /api/v1/pacientes/{id}/medicaciones
+func (h *MedicamentoHandler) ListarPorPaciente(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    pacienteID, _ := strconv.Atoi(idStr)
+
+    medicaciones, err := h.Storage.ListarMedicacionPorPaciente(pacienteID)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al listar medicaciones")
+        return
+    }
+    RespondJSON(w, http.StatusOK, medicaciones)
+}
+
+// ObtenerHistorial de un paciente GET /api/v1/pacientes/{id}/historial
+func (h *HistorialHandler) ListarPorPaciente(w http.ResponseWriter, r *http.Request) {
+    idStr := chi.URLParam(r, "id")
+    pacienteID, _ := strconv.Atoi(idStr)
+
+    historiales, err := h.Storage.ListarHistorialPorPaciente(pacienteID)
+    if err != nil {
+        RespondError(w, http.StatusInternalServerError, "Error al listar historial")
+        return
+    }
+    RespondJSON(w, http.StatusOK, historiales)
 }
 

@@ -23,7 +23,11 @@ func main() {
     }
 
     // 2. Migrar tablas según los modelos
-    if err := db.AutoMigrate(&models.Medicacion{}); err != nil {
+    if err := db.AutoMigrate(
+        &models.Medicacion{},
+        &models.Paciente{},
+        &models.HistorialMedicacion{},
+    ); err != nil {
         log.Fatal("Error al migrar la base de datos:", err)
     }
 
@@ -32,7 +36,9 @@ func main() {
     almacen.SembrarVacioMedicacion()
     
     // 4. Crear el handler inyectando el almacenamiento
-    servidor := handlers.NewMedicamentoHandler(almacen)
+    medicamentoHandler := handlers.NewMedicamentoHandler(almacen)
+    pacienteHandler := handlers.NewPacienteHandler(almacen)
+    historialHandler := handlers.NewHistorialHandler(almacen)
 
     // 5. Configurar router con Chi
     r := chi.NewRouter()
@@ -45,11 +51,26 @@ func main() {
     // 7. Rutas versionadas /api/v1/
     r.Route("/api/v1", func(r chi.Router) {
         // Rutas para medicacion
-        r.Get("/medicaciones", servidor.ListarMedicacion)
-        r.Post("/medicaciones", servidor.CrearMedicacion)
-        r.Get("/medicaciones/{id}", servidor.ObtenerMedicacion)
-        r.Put("/medicaciones/{id}", servidor.ActualizarMedicacion)
-        r.Delete("/medicaciones/{id}", servidor.EliminarMedicacion)
+        r.Get("/medicaciones", medicamentoHandler.ListarMedicacion)
+        r.Post("/medicaciones", medicamentoHandler.CrearMedicacion)
+        r.Get("/medicaciones/{id}", medicamentoHandler.ObtenerMedicacion)
+        r.Put("/medicaciones/{id}", medicamentoHandler.ActualizarMedicacion)
+        r.Delete("/medicaciones/{id}", medicamentoHandler.EliminarMedicacion)
+
+        r.Get("/pacientes", pacienteHandler.ListarPacientes)
+        r.Post("/pacientes", pacienteHandler.CrearPaciente)
+        r.Get("/pacientes/{id}", pacienteHandler.BuscarPacientePorID)
+        r.Put("/pacientes/{id}", pacienteHandler.ActualizarPaciente)
+        r.Delete("/pacientes/{id}", pacienteHandler.EliminarPaciente)
+
+        r.Get("/historial", historialHandler.ListarHistorial) 
+        r.Get("/historial/{id}", historialHandler.BuscarPorID)                 
+        r.Post("/historial", historialHandler.Crear)                           
+        r.Put("/historial/{id}", historialHandler.Actualizar)                  
+        r.Delete("/historial/{id}", historialHandler.Eliminar) 
+
+        r.Get("/pacientes/{id}/medicaciones", medicamentoHandler.ListarPorPaciente)
+        r.Get("/pacientes/{id}/historial", historialHandler.ListarPorPaciente)
 
         r.Post("/medicamentos_farmacia", handlers.CreateMedicamento)
 	    r.Get("/medicamentos_farmacia", handlers.GetMedicamentos)
