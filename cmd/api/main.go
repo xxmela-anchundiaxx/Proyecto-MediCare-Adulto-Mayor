@@ -29,7 +29,7 @@ import (
 	storageMonitoreo "proyecto-medicare-adulto-mayor/internal/storage/monitoreo"
 )
 
-func main() {
+func main() 
 	var dialector gorm.Dialector
 
 	// 1. Comprobamos si estamos dentro del entorno Docker
