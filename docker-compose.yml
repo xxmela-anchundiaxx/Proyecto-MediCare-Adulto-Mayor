@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: medicare_postgres
+    environment:
+      POSTGRES_USER: medicare_user
+      POSTGRES_PASSWORD: medicare_password
+      POSTGRES_DB: medicare_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medicare_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_db
+    environment:
+      DB_ENV: "production"
+      DB_HOST: postgres_db
+      DB_USER: medicare_user
+      DB_PASSWORD: medicare_password
+      DB_NAME: medicare_db
+      DB_PORT: 5432
+
+volumes:
+  postgres_data:
