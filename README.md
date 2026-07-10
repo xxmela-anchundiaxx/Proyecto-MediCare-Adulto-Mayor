@@ -3,9 +3,14 @@
 API REST desarrollada en **Go** para la gestión de dos módulos:
 - **Medicaciones** (almacenadas en SQLite con GORM).
 - **Medicamentos de Farmacia** (almacenados en memoria).
+- **Base de Datos:** PostgreSQL
 - **Monitorio familiar o cuidador (almacenados en memoria)
-
+- **Contenerización:** Docker / Docker-Compose
 ---
+## Integrantes y Responsabilidades por Módulo
+- **Módulo Medicación:** [Tu Nombre Completo aquí] - `POST /medicaciones`, `GET /medicaciones`
+- **Módulo Medicamento Farmacia:** [Anchundia Acosta Melanie Ariana] - `GET /farmacia/economico`, `POST /farmacia`
+- **Módulo Monitoreo Familiar:** [Nombre de Compañero 3] - `POST /monitoreo/vincular`, `GET /monitoreo`
 
 ## Instalación
 1. Clonar el repositorio:
@@ -51,3 +56,21 @@ El sistema busca ser una herramienta práctica para:
 - Cuidadores y familiares, que pueden monitorear y apoyar en el cumplimiento de los tratamientos.
 
 
+##  Arquitectura del Sistema
+El proyecto implementa una **Arquitectura Limpia en Capas**, acoplada mediante interfaces e inyección de dependencias desde el punto de entrada principal (`main.go`), estructurada de la siguiente manera:
+---`Handler (Controlador HTTP)  Service (Lógica de Negocio/Validaciones) Repository (Persistencia GORM)`
+##  Endpoints Documentados de la API
+
+### 1. Módulo Medicación
+- `POST /api/medicaciones` - Registrar una nueva medicación para un paciente (Valida campos obligatorios y la existencia del paciente).
+- `GET /api/medicaciones` - Consultar todas las medicaciones del sistema y sus relaciones.
+
+### 2. Módulo Medicamento Farmacia
+- `POST /api/farmacia/medicamentos` - Registrar medicamentos disponibles en las farmacias.
+- `GET /api/farmacia/medicamentos` - Listar inventario de farmacia (Permite filtrar por disponibilidad).
+- `GET /api/farmacia/medicamentos/economico` - Endpoint de consulta rápida que retorna el medicamento con menor precio registrado.
+
+### 3. Módulo Monitoreo Familiar-Cuidador
+- `POST /api/monitoreo/vincular` - Crear una relación Many-to-Many entre un cuidador y un adulto mayor (paciente).
+- `GET /api/monitoreo/relaciones` - Consultar todas las relaciones de asistencia vigentes.
+- `GET /api/monitoreo/relaciones/{id}` - Obtener los detalles de monitoreo de un cuidador específico por su ID.
