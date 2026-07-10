@@ -9,9 +9,9 @@ import (
 )
 
 type CuidadoresPacientes struct {
-	ID         int64  `json:"id"`
-	CuidadorID int64  `json:"cuidador_id"`
-	PacienteID int64  `json:"paciente_id"`
+	ID         int32  `json:"id"`
+	CuidadorID int32  `json:"cuidador_id"`
+	PacienteID int32  `json:"paciente_id"`
 	Relacion   string `json:"relacion"`
 }
 
@@ -20,20 +20,20 @@ type Farmacias struct {
 	Nombre    string  `json:"nombre"`
 	Direccion string  `json:"direccion"`
 	Telefono  string  `json:"telefono"`
-	Latitud   float64 `json:"latitud"`
-	Longitud  float64 `json:"longitud"`
+	Latitud   float32 `json:"latitud"`
+	Longitud  float32 `json:"longitud"`
 }
 
 type HistorialMedicaciones struct {
-	ID           int64     `json:"id"`
-	MedicacionID int64     `json:"medicacion_id"`
+	ID           int32     `json:"id"`
+	MedicacionID int32     `json:"medicacion_id"`
 	FechaHora    time.Time `json:"fecha_hora"`
 	Tomada       bool      `json:"tomada"`
 	Observacion  string    `json:"observacion"`
 }
 
 type Medicaciones struct {
-	ID                int64     `json:"id"`
+	ID                int32     `json:"id"`
 	Nombre            string    `json:"nombre"`
 	Descripcion       string    `json:"descripcion"`
 	Dosis             string    `json:"dosis"`
@@ -41,11 +41,11 @@ type Medicaciones struct {
 	HoraProgramada    string    `json:"hora_programada"`
 	InicioTratamiento time.Time `json:"inicio_tratamiento"`
 	FechaCreacion     time.Time `json:"fecha_creacion"`
-	PacienteID        int64     `json:"paciente_id"`
+	PacienteID        int32     `json:"paciente_id"`
 }
 
 type Pacientes struct {
-	ID     int64  `json:"id"`
+	ID     int32  `json:"id"`
 	Nombre string `json:"nombre"`
-	Edad   int64  `json:"edad"`
+	Edad   int32  `json:"edad"`
 }

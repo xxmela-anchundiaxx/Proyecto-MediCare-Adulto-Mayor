@@ -40,10 +40,10 @@ func (s *HistorialService) Eliminar(id int) error {
 }
 
 type MedicacionHistorialService struct {
-	repo storage.Medicacion_HistorialRepository
+	repo storage.MedicacionHistorialRepository
 }
 
-func NewMedicacionHistorialService(repo storage.Medicacion_HistorialRepository) *MedicacionHistorialService {
+func NewMedicacionHistorialService(repo storage.MedicacionHistorialRepository) *MedicacionHistorialService {
 	return &MedicacionHistorialService{repo: repo}
 }
 

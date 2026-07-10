@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"proyecto-medicare-adulto-mayor/internal/response"
+	"github.com/go-chi/chi/v5"
+
 	"proyecto-medicare-adulto-mayor/internal/models/farmacia"
+	"proyecto-medicare-adulto-mayor/internal/response"
 	servicioFarmacia "proyecto-medicare-adulto-mayor/internal/service/farmacia"
 )
 
@@ -18,15 +20,11 @@ func NuevoManejadorFarmacia(s *servicioFarmacia.ServicioFarmacia) *ManejadorFarm
 	return &ManejadorFarmacia{Servicio: s}
 }
 
+// POST /api/v1/farmacias
 func (h *ManejadorFarmacia) RegistrarFarmacia(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		response.RespondError(w, http.StatusMethodNotAllowed, "método no permitido")
-		return
-	}
-
 	var req farmacia.Farmacia
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.RespondError(w, http.StatusBadRequest, "cuerpo de petición inválido")
+		response.RespondError(w, http.StatusBadRequest, "JSON inválido")
 		return
 	}
 
@@ -38,18 +36,12 @@ func (h *ManejadorFarmacia) RegistrarFarmacia(w http.ResponseWriter, r *http.Req
 	response.RespondJSON(w, http.StatusCreated, req)
 }
 
+// GET /api/v1/farmacias
 func (h *ManejadorFarmacia) BuscarCercanas(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		response.RespondError(w, http.StatusMethodNotAllowed, "método no permitido")
-		return
-	}
-
 	latStr := r.URL.Query().Get("lat")
 	lonStr := r.URL.Query().Get("lon")
-	radioStr := r.URL.Query().Get("radio_km")
 
 	if latStr == "" || lonStr == "" {
-		// Retornar todas las farmacias si no hay coordenadas de búsqueda
 		lista, err := h.Servicio.ListarTodas()
 		if err != nil {
 			response.RespondError(w, http.StatusInternalServerError, err.Error())
@@ -59,19 +51,9 @@ func (h *ManejadorFarmacia) BuscarCercanas(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	lat, err1 := strconv.ParseFloat(latStr, 64)
-	lon, err2 := strconv.ParseFloat(lonStr, 64)
-	if err1 != nil || err2 != nil {
-		response.RespondError(w, http.StatusBadRequest, "coordenadas latitud/longitud inválidas")
-		return
-	}
-
-	radioKM := 5.0
-	if radioStr != "" {
-		if rVal, err := strconv.ParseFloat(radioStr, 64); err == nil {
-			radioKM = rVal
-		}
-	}
+	lat, _ := strconv.ParseFloat(latStr, 64)
+	lon, _ := strconv.ParseFloat(lonStr, 64)
+	radioKM, _ := strconv.ParseFloat(r.URL.Query().Get("radio_km"), 64)
 
 	cercanas, err := h.Servicio.BuscarCercanas(lat, lon, radioKM)
 	if err != nil {
@@ -80,4 +62,47 @@ func (h *ManejadorFarmacia) BuscarCercanas(w http.ResponseWriter, r *http.Reques
 	}
 
 	response.RespondJSON(w, http.StatusOK, cercanas)
+}
+
+// GET /api/v1/farmacias/{id}
+func (h *ManejadorFarmacia) ObtenerPorID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	f, err := h.Servicio.BuscarPorID(id)
+	if err != nil {
+		response.RespondError(w, http.StatusNotFound, "Farmacia no encontrada")
+		return
+	}
+
+	response.RespondJSON(w, http.StatusOK, f)
+}
+
+// PUT /api/v1/farmacias/{id}
+func (h *ManejadorFarmacia) ActualizarFarmacia(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var req farmacia.Farmacia
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.RespondError(w, http.StatusBadRequest, "JSON inválido")
+		return
+	}
+
+	if err := h.Servicio.ActualizarFarmacia(id, &req); err != nil {
+		response.RespondError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.RespondJSON(w, http.StatusOK, req)
+}
+
+// DELETE /api/v1/farmacias/{id}
+func (h *ManejadorFarmacia) EliminarFarmacia(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	if err := h.Servicio.EliminarFarmacia(id); err != nil {
+		response.RespondError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.RespondJSON(w, http.StatusOK, map[string]interface{}{"message": "Farmacia eliminada correctamente"})
 }
