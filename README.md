@@ -64,7 +64,7 @@ Este módulo gestiona la relación entre cuidadores (familiares, enfermeros) y p
 ## Stack Tecnológico
 - **Lenguaje:** Go 1.x
 - **Arquitectura:** En capas (Handler → Service → Repository)
-- **Persistencia:** GORM con SQLite (para Medicación/Pacientes) y almacenamiento en memoria (para Farmacias/Monitoreo).
+- **Persistencia:** GORM con SQLite (para Medicación/Pacientes) y (para Farmacias/Monitoreo).
 - **Seguridad:** Autenticación centralizada mediante JWT con roles (paciente, cuidador, admin).
 - **Contenedores:** Docker Multi-stage y `docker-compose`.
 
