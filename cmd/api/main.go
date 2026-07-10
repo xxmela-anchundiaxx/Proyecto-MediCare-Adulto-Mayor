@@ -48,7 +48,7 @@ func main() {
 
 	db, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		log.Fatal("❌ No se pudo conectar a la base de datos:", err)
+		log.Fatal(" No se pudo conectar a la base de datos:", err)
 	}
 
 	// 2. MIGRACIONES EN ORDEN ESTRICTO (Esto soluciona el error 42P01)
@@ -67,7 +67,7 @@ func main() {
 	}
 	
 	if err != nil {
-		log.Fatal("❌ Error al migrar la base de datos:", err)
+		log.Fatal("Error al migrar la base de datos:", err)
 	}
 
 	// 3. Inyección de dependencias
