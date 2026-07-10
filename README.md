@@ -57,8 +57,8 @@ Este módulo gestiona la relación entre cuidadores (familiares, enfermeros) y p
 
 
 ## Equipo de Desarrollo
-- **[ARAY GAÓN Lisbeth Dolores]** - Módulo Medicacion 
-- **[ACOSTA ANCHUNDIA]** -' Módulo Farmacia
+- **[ARAY GAÓN LISBETH DOLORES]** - Módulo Medicacion 
+- **[ACOSTA ANCHUNDIA MELANIE ARIANA]** -' Módulo Farmacia
 - **[]** - Módulo de Monitoreo Familiar
 
 ## Stack Tecnológico
