@@ -4,6 +4,7 @@ import (
 	servicioMedicacion "proyecto-medicare-adulto-mayor/internal/service/medicacion"
 )
 
+
 type Server struct {
 	Medicacion          *servicioMedicacion.MedicacionService
 	Paciente            *servicioMedicacion.PacienteService

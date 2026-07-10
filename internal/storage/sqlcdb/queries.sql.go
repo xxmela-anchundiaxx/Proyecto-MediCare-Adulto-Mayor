@@ -12,8 +12,8 @@ import (
 
 const actualizarFarmacia = `-- name: ActualizarFarmacia :one
 UPDATE farmacias
-SET nombre = ?, direccion = ?, telefono = ?, latitud = ?, longitud = ?
-WHERE id = ?
+SET nombre = $1, direccion = $2, telefono = $3, latitud = $4, longitud = $5
+WHERE id = $6
 RETURNING id, nombre, direccion, telefono, latitud, longitud
 `
 
@@ -21,8 +21,8 @@ type ActualizarFarmaciaParams struct {
 	Nombre    string  `json:"nombre"`
 	Direccion string  `json:"direccion"`
 	Telefono  string  `json:"telefono"`
-	Latitud   float64 `json:"latitud"`
-	Longitud  float64 `json:"longitud"`
+	Latitud   float32 `json:"latitud"`
+	Longitud  float32 `json:"longitud"`
 	ID        string  `json:"id"`
 }
 
@@ -49,17 +49,17 @@ func (q *Queries) ActualizarFarmacia(ctx context.Context, arg ActualizarFarmacia
 
 const actualizarHistorial = `-- name: ActualizarHistorial :one
 UPDATE historial_medicaciones
-SET medicacion_id = ?, fecha_hora = ?, tomada = ?, observacion = ?
-WHERE id = ?
+SET medicacion_id = $1, fecha_hora = $2, tomada = $3, observacion = $4
+WHERE id = $5
 RETURNING id, medicacion_id, fecha_hora, tomada, observacion
 `
 
 type ActualizarHistorialParams struct {
-	MedicacionID int64     `json:"medicacion_id"`
+	MedicacionID int32     `json:"medicacion_id"`
 	FechaHora    time.Time `json:"fecha_hora"`
 	Tomada       bool      `json:"tomada"`
 	Observacion  string    `json:"observacion"`
-	ID           int64     `json:"id"`
+	ID           int32     `json:"id"`
 }
 
 func (q *Queries) ActualizarHistorial(ctx context.Context, arg ActualizarHistorialParams) (HistorialMedicaciones, error) {
@@ -83,9 +83,9 @@ func (q *Queries) ActualizarHistorial(ctx context.Context, arg ActualizarHistori
 
 const actualizarMedicacion = `-- name: ActualizarMedicacion :one
 UPDATE medicaciones
-SET nombre = ?, descripcion = ?, dosis = ?, frecuencia = ?, hora_programada = ?,
-    inicio_tratamiento = ?, fecha_creacion = ?, paciente_id = ?
-WHERE id = ?
+SET nombre = $1, descripcion = $2, dosis = $3, frecuencia = $4, hora_programada = $5,
+    inicio_tratamiento = $6, fecha_creacion = $7, paciente_id = $8
+WHERE id = $9
 RETURNING id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id
 `
 
@@ -97,8 +97,8 @@ type ActualizarMedicacionParams struct {
 	HoraProgramada    string    `json:"hora_programada"`
 	InicioTratamiento time.Time `json:"inicio_tratamiento"`
 	FechaCreacion     time.Time `json:"fecha_creacion"`
-	PacienteID        int64     `json:"paciente_id"`
-	ID                int64     `json:"id"`
+	PacienteID        int32     `json:"paciente_id"`
+	ID                int32     `json:"id"`
 }
 
 func (q *Queries) ActualizarMedicacion(ctx context.Context, arg ActualizarMedicacionParams) (Medicaciones, error) {
@@ -130,15 +130,15 @@ func (q *Queries) ActualizarMedicacion(ctx context.Context, arg ActualizarMedica
 
 const actualizarPaciente = `-- name: ActualizarPaciente :one
 UPDATE pacientes
-SET nombre = ?, edad = ?
-WHERE id = ?
+SET nombre = $1, edad = $2
+WHERE id = $3
 RETURNING id, nombre, edad
 `
 
 type ActualizarPacienteParams struct {
 	Nombre string `json:"nombre"`
-	Edad   int64  `json:"edad"`
-	ID     int64  `json:"id"`
+	Edad   int32  `json:"edad"`
+	ID     int32  `json:"id"`
 }
 
 func (q *Queries) ActualizarPaciente(ctx context.Context, arg ActualizarPacienteParams) (Pacientes, error) {
@@ -150,16 +150,16 @@ func (q *Queries) ActualizarPaciente(ctx context.Context, arg ActualizarPaciente
 
 const actualizarRelacion = `-- name: ActualizarRelacion :one
 UPDATE cuidadores_pacientes
-SET cuidador_id = ?, paciente_id = ?, relacion = ?
-WHERE id = ?
+SET cuidador_id = $1, paciente_id = $2, relacion = $3
+WHERE id = $4
 RETURNING id, cuidador_id, paciente_id, relacion
 `
 
 type ActualizarRelacionParams struct {
-	CuidadorID int64  `json:"cuidador_id"`
-	PacienteID int64  `json:"paciente_id"`
+	CuidadorID int32  `json:"cuidador_id"`
+	PacienteID int32  `json:"paciente_id"`
 	Relacion   string `json:"relacion"`
-	ID         int64  `json:"id"`
+	ID         int32  `json:"id"`
 }
 
 func (q *Queries) ActualizarRelacion(ctx context.Context, arg ActualizarRelacionParams) (CuidadoresPacientes, error) {
@@ -181,7 +181,7 @@ func (q *Queries) ActualizarRelacion(ctx context.Context, arg ActualizarRelacion
 
 const crearFarmacia = `-- name: CrearFarmacia :one
 INSERT INTO farmacias (id, nombre, direccion, telefono, latitud, longitud)
-VALUES (?, ?, ?, ?, ?, ?)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, nombre, direccion, telefono, latitud, longitud
 `
 
@@ -190,8 +190,8 @@ type CrearFarmaciaParams struct {
 	Nombre    string  `json:"nombre"`
 	Direccion string  `json:"direccion"`
 	Telefono  string  `json:"telefono"`
-	Latitud   float64 `json:"latitud"`
-	Longitud  float64 `json:"longitud"`
+	Latitud   float32 `json:"latitud"`
+	Longitud  float32 `json:"longitud"`
 }
 
 func (q *Queries) CrearFarmacia(ctx context.Context, arg CrearFarmaciaParams) (Farmacias, error) {
@@ -217,12 +217,12 @@ func (q *Queries) CrearFarmacia(ctx context.Context, arg CrearFarmaciaParams) (F
 
 const crearHistorial = `-- name: CrearHistorial :one
 INSERT INTO historial_medicaciones (medicacion_id, fecha_hora, tomada, observacion)
-VALUES (?, ?, ?, ?)
+VALUES ($1, $2, $3, $4)
 RETURNING id, medicacion_id, fecha_hora, tomada, observacion
 `
 
 type CrearHistorialParams struct {
-	MedicacionID int64     `json:"medicacion_id"`
+	MedicacionID int32     `json:"medicacion_id"`
 	FechaHora    time.Time `json:"fecha_hora"`
 	Tomada       bool      `json:"tomada"`
 	Observacion  string    `json:"observacion"`
@@ -250,7 +250,7 @@ const crearMedicacion = `-- name: CrearMedicacion :one
 INSERT INTO medicaciones (
     nombre, descripcion, dosis, frecuencia, hora_programada,
     inicio_tratamiento, fecha_creacion, paciente_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id
 `
 
@@ -262,7 +262,7 @@ type CrearMedicacionParams struct {
 	HoraProgramada    string    `json:"hora_programada"`
 	InicioTratamiento time.Time `json:"inicio_tratamiento"`
 	FechaCreacion     time.Time `json:"fecha_creacion"`
-	PacienteID        int64     `json:"paciente_id"`
+	PacienteID        int32     `json:"paciente_id"`
 }
 
 func (q *Queries) CrearMedicacion(ctx context.Context, arg CrearMedicacionParams) (Medicaciones, error) {
@@ -293,13 +293,13 @@ func (q *Queries) CrearMedicacion(ctx context.Context, arg CrearMedicacionParams
 
 const crearPaciente = `-- name: CrearPaciente :one
 INSERT INTO pacientes (nombre, edad)
-VALUES (?, ?)
+VALUES ($1, $2)
 RETURNING id, nombre, edad
 `
 
 type CrearPacienteParams struct {
 	Nombre string `json:"nombre"`
-	Edad   int64  `json:"edad"`
+	Edad   int32  `json:"edad"`
 }
 
 func (q *Queries) CrearPaciente(ctx context.Context, arg CrearPacienteParams) (Pacientes, error) {
@@ -311,13 +311,13 @@ func (q *Queries) CrearPaciente(ctx context.Context, arg CrearPacienteParams) (P
 
 const crearRelacion = `-- name: CrearRelacion :one
 INSERT INTO cuidadores_pacientes (cuidador_id, paciente_id, relacion)
-VALUES (?, ?, ?)
+VALUES ($1, $2, $3)
 RETURNING id, cuidador_id, paciente_id, relacion
 `
 
 type CrearRelacionParams struct {
-	CuidadorID int64  `json:"cuidador_id"`
-	PacienteID int64  `json:"paciente_id"`
+	CuidadorID int32  `json:"cuidador_id"`
+	PacienteID int32  `json:"paciente_id"`
 	Relacion   string `json:"relacion"`
 }
 
@@ -334,7 +334,7 @@ func (q *Queries) CrearRelacion(ctx context.Context, arg CrearRelacionParams) (C
 }
 
 const eliminarFarmacia = `-- name: EliminarFarmacia :exec
-DELETE FROM farmacias WHERE id = ?
+DELETE FROM farmacias WHERE id = $1
 `
 
 func (q *Queries) EliminarFarmacia(ctx context.Context, id string) error {
@@ -343,37 +343,37 @@ func (q *Queries) EliminarFarmacia(ctx context.Context, id string) error {
 }
 
 const eliminarHistorial = `-- name: EliminarHistorial :exec
-DELETE FROM historial_medicaciones WHERE id = ?
+DELETE FROM historial_medicaciones WHERE id = $1
 `
 
-func (q *Queries) EliminarHistorial(ctx context.Context, id int64) error {
+func (q *Queries) EliminarHistorial(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, eliminarHistorial, id)
 	return err
 }
 
 const eliminarMedicacion = `-- name: EliminarMedicacion :exec
-DELETE FROM medicaciones WHERE id = ?
+DELETE FROM medicaciones WHERE id = $1
 `
 
-func (q *Queries) EliminarMedicacion(ctx context.Context, id int64) error {
+func (q *Queries) EliminarMedicacion(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, eliminarMedicacion, id)
 	return err
 }
 
 const eliminarPaciente = `-- name: EliminarPaciente :exec
-DELETE FROM pacientes WHERE id = ?
+DELETE FROM pacientes WHERE id = $1
 `
 
-func (q *Queries) EliminarPaciente(ctx context.Context, id int64) error {
+func (q *Queries) EliminarPaciente(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, eliminarPaciente, id)
 	return err
 }
 
 const eliminarRelacion = `-- name: EliminarRelacion :exec
-DELETE FROM cuidadores_pacientes WHERE id = ?
+DELETE FROM cuidadores_pacientes WHERE id = $1
 `
 
-func (q *Queries) EliminarRelacion(ctx context.Context, id int64) error {
+func (q *Queries) EliminarRelacion(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, eliminarRelacion, id)
 	return err
 }
@@ -451,10 +451,10 @@ const listarHistorialPorPaciente = `-- name: ListarHistorialPorPaciente :many
 SELECT h.id, h.medicacion_id, h.fecha_hora, h.tomada, h.observacion
 FROM historial_medicaciones h
 JOIN medicaciones m ON h.medicacion_id = m.id
-WHERE m.paciente_id = ?
+WHERE m.paciente_id = $1
 `
 
-func (q *Queries) ListarHistorialPorPaciente(ctx context.Context, pacienteID int64) ([]HistorialMedicaciones, error) {
+func (q *Queries) ListarHistorialPorPaciente(ctx context.Context, pacienteID int32) ([]HistorialMedicaciones, error) {
 	rows, err := q.db.QueryContext(ctx, listarHistorialPorPaciente, pacienteID)
 	if err != nil {
 		return nil, err
@@ -522,10 +522,10 @@ func (q *Queries) ListarMedicaciones(ctx context.Context) ([]Medicaciones, error
 }
 
 const listarMedicacionesPorPaciente = `-- name: ListarMedicacionesPorPaciente :many
-SELECT id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id FROM medicaciones WHERE paciente_id = ?
+SELECT id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id FROM medicaciones WHERE paciente_id = $1
 `
 
-func (q *Queries) ListarMedicacionesPorPaciente(ctx context.Context, pacienteID int64) ([]Medicaciones, error) {
+func (q *Queries) ListarMedicacionesPorPaciente(ctx context.Context, pacienteID int32) ([]Medicaciones, error) {
 	rows, err := q.db.QueryContext(ctx, listarMedicacionesPorPaciente, pacienteID)
 	if err != nil {
 		return nil, err
@@ -620,7 +620,7 @@ func (q *Queries) ListarRelaciones(ctx context.Context) ([]CuidadoresPacientes, 
 }
 
 const obtenerFarmaciaPorID = `-- name: ObtenerFarmaciaPorID :one
-SELECT id, nombre, direccion, telefono, latitud, longitud FROM farmacias WHERE id = ?
+SELECT id, nombre, direccion, telefono, latitud, longitud FROM farmacias WHERE id = $1
 `
 
 func (q *Queries) ObtenerFarmaciaPorID(ctx context.Context, id string) (Farmacias, error) {
@@ -638,10 +638,10 @@ func (q *Queries) ObtenerFarmaciaPorID(ctx context.Context, id string) (Farmacia
 }
 
 const obtenerHistorialPorID = `-- name: ObtenerHistorialPorID :one
-SELECT id, medicacion_id, fecha_hora, tomada, observacion FROM historial_medicaciones WHERE id = ?
+SELECT id, medicacion_id, fecha_hora, tomada, observacion FROM historial_medicaciones WHERE id = $1
 `
 
-func (q *Queries) ObtenerHistorialPorID(ctx context.Context, id int64) (HistorialMedicaciones, error) {
+func (q *Queries) ObtenerHistorialPorID(ctx context.Context, id int32) (HistorialMedicaciones, error) {
 	row := q.db.QueryRowContext(ctx, obtenerHistorialPorID, id)
 	var i HistorialMedicaciones
 	err := row.Scan(
@@ -655,10 +655,10 @@ func (q *Queries) ObtenerHistorialPorID(ctx context.Context, id int64) (Historia
 }
 
 const obtenerMedicacionPorID = `-- name: ObtenerMedicacionPorID :one
-SELECT id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id FROM medicaciones WHERE id = ?
+SELECT id, nombre, descripcion, dosis, frecuencia, hora_programada, inicio_tratamiento, fecha_creacion, paciente_id FROM medicaciones WHERE id = $1
 `
 
-func (q *Queries) ObtenerMedicacionPorID(ctx context.Context, id int64) (Medicaciones, error) {
+func (q *Queries) ObtenerMedicacionPorID(ctx context.Context, id int32) (Medicaciones, error) {
 	row := q.db.QueryRowContext(ctx, obtenerMedicacionPorID, id)
 	var i Medicaciones
 	err := row.Scan(
@@ -676,10 +676,10 @@ func (q *Queries) ObtenerMedicacionPorID(ctx context.Context, id int64) (Medicac
 }
 
 const obtenerPacientePorID = `-- name: ObtenerPacientePorID :one
-SELECT id, nombre, edad FROM pacientes WHERE id = ?
+SELECT id, nombre, edad FROM pacientes WHERE id = $1
 `
 
-func (q *Queries) ObtenerPacientePorID(ctx context.Context, id int64) (Pacientes, error) {
+func (q *Queries) ObtenerPacientePorID(ctx context.Context, id int32) (Pacientes, error) {
 	row := q.db.QueryRowContext(ctx, obtenerPacientePorID, id)
 	var i Pacientes
 	err := row.Scan(&i.ID, &i.Nombre, &i.Edad)
@@ -687,10 +687,10 @@ func (q *Queries) ObtenerPacientePorID(ctx context.Context, id int64) (Pacientes
 }
 
 const obtenerRelacionPorID = `-- name: ObtenerRelacionPorID :one
-SELECT id, cuidador_id, paciente_id, relacion FROM cuidadores_pacientes WHERE id = ?
+SELECT id, cuidador_id, paciente_id, relacion FROM cuidadores_pacientes WHERE id = $1
 `
 
-func (q *Queries) ObtenerRelacionPorID(ctx context.Context, id int64) (CuidadoresPacientes, error) {
+func (q *Queries) ObtenerRelacionPorID(ctx context.Context, id int32) (CuidadoresPacientes, error) {
 	row := q.db.QueryRowContext(ctx, obtenerRelacionPorID, id)
 	var i CuidadoresPacientes
 	err := row.Scan(

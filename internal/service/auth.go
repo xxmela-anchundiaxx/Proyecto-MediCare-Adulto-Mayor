@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -15,36 +14,28 @@ import (
 var secretoJWT = []byte("medicare-secret-2024")
 var duracionToken = time.Hour * 24
 
-// Descomentado para evitar el error de compilación
-//var ErrEmailEnUso = errors.New("el email ya está en uso") 
-var ErrCredencialesInvalidos = errors.New("credenciales inválidas")
-var ErrEmailVacio = errors.New("email o password vacíos")
-
 type Claims struct {
 	UsuarioID int `json:"uid"`
 	jwt.RegisteredClaims
 }
 
-// 1. Definimos la estructura AuthService que espera tu main.go
 type AuthService struct {
-	repo *storage.AlmacenUsuario // O cambia esto a tu repositorio GORM definitivo si lo requieres
+	repo storage.UserRepository
 }
 
-// 2. Definimos el constructor NewAuthService que llamas en main.go
-func NewAuthService(repo *storage.AlmacenUsuario) *AuthService {
+func NewAuthService(repo storage.UserRepository) *AuthService {
 	return &AuthService{
 		repo: repo,
 	}
 }
 
-// 3. Convertimos Registrar y Login en métodos de AuthService
 func (s *AuthService) Registrar(email, password string) (models.Usuario, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
+
 	if email == "" || strings.TrimSpace(password) == "" {
 		return models.Usuario{}, ErrEmailVacio
 	}
 
-	// Usamos s.repo en lugar de la variable global antigua
 	if _, existe := s.repo.BuscarUsuarioPorEmail(email); existe {
 		return models.Usuario{}, ErrEmailEnUso
 	}
@@ -54,24 +45,29 @@ func (s *AuthService) Registrar(email, password string) (models.Usuario, error) 
 		return models.Usuario{}, err
 	}
 
-	return s.repo.CrearUsuario(email, string(hash)), nil
+	usuario := models.Usuario{
+		Email:        email,
+		PasswordHash: string(hash),
+	}
+
+	return s.repo.CrearUsuario(usuario)
 }
 
 func (s *AuthService) Login(email, password string) (string, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 
-	// Buscar usuario en el repositorio inyectado
 	usuario, existe := s.repo.BuscarUsuarioPorEmail(email)
 	if !existe {
-		return "", ErrCredencialesInvalidos
+		return "", ErrCredencialesInvalidas
 	}
 
-	// Verificar contraseña
-	if bcrypt.CompareHashAndPassword([]byte(usuario.PasswordHash), []byte(password)) != nil {
-		return "", ErrCredencialesInvalidos
+	if err := bcrypt.CompareHashAndPassword(
+		[]byte(usuario.PasswordHash),
+		[]byte(password),
+	); err != nil {
+		return "", ErrCredencialesInvalidas
 	}
 
-	// Generar token JWT
 	return s.generarToken(usuario)
 }
 
@@ -83,23 +79,28 @@ func (s *AuthService) generarToken(u models.Usuario) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString(secretoJWT)
 }
 
 func (s *AuthService) VerificarToken(tokenStr string) (int, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrCredencialesInvalidos
+			return nil, ErrCredencialesInvalidas
 		}
 		return secretoJWT, nil
 	})
+
 	if err != nil || !token.Valid {
-		return 0, ErrCredencialesInvalidos
+		return 0, ErrCredencialesInvalidas
 	}
+
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return 0, ErrCredencialesInvalidos
+		return 0, ErrCredencialesInvalidas
 	}
+
 	return claims.UsuarioID, nil
 }

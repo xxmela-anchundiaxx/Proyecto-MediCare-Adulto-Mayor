@@ -5,11 +5,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/glebarez/sqlite"
-	"gorm.io/driver/postgres" // <-- Driver necesario para producción en Docker
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"proyecto-medicare-adulto-mayor/internal/handlers"
@@ -27,94 +28,75 @@ import (
 	"proyecto-medicare-adulto-mayor/internal/storage"
 	storageFarmacia "proyecto-medicare-adulto-mayor/internal/storage/farmacia"
 	storageMonitoreo "proyecto-medicare-adulto-mayor/internal/storage/monitoreo"
+	"proyecto-medicare-adulto-mayor/internal/models" // Asegúrate de tener Usuario aquí
 )
 
 func main() {
 	var dialector gorm.Dialector
-
-	// 1. Comprobamos si estamos dentro del entorno Docker
-	dbEnv := os.Getenv("DB_ENV")
-
-	if dbEnv == "production" {
-		// --- CONFIGURACIÓN PARA POSTGRESQL (DOCKER) ---
-		host := os.Getenv("DB_HOST")
-		user := os.Getenv("DB_USER")
-		password := os.Getenv("DB_PASSWORD")
-		dbname := os.Getenv("DB_NAME")
-		port := os.Getenv("DB_PORT")
-
+	
+	// 1. Configuración de Base de Datos
+	if os.Getenv("DB_ENV") == "production" {
 		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-			host, user, password, dbname, port)
-
+			os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 		dialector = postgres.Open(dsn)
-		log.Println("🚀 Conectado con éxito a PostgreSQL en contenedor Docker")
 	} else {
-		// --- CONFIGURACIÓN PARA SQLITE (LOCAL TRADICIONAL) ---
-		dialector = sqlite.Open("medicare.db")
-		log.Println("💻 Conectado localmente a SQLite (medicare.db)")
+		dsn := "db/medicare.db"
+		_ = os.MkdirAll(filepath.Dir(dsn), 0755)
+		dialector = sqlite.Open(dsn)
 	}
 
-	// Abrir la conexión con GORM utilizando el dialector seleccionado
 	db, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		log.Fatal("No se pudo conectar a la base de datos:", err)
+		log.Fatal("❌ No se pudo conectar a la base de datos:", err)
 	}
 
-	// 2. Migrar tablas dinámicamente en el motor activo
-	if err := db.AutoMigrate(
-		&modelsMedicacion.Medicacion{},
-		&modelsMedicacion.Paciente{},
-		&modelsMedicacion.HistorialMedicacion{},
-		&modelsMonitoreo.CuidadorPaciente{},
+	// 2. MIGRACIONES EN ORDEN ESTRICTO (Esto soluciona el error 42P01)
+	// Primero tablas sin dependencias, luego las que tienen llaves foráneas.
+	err = db.AutoMigrate(
+		&models.Usuario{},
 		&modelsFarmacia.Farmacia{},
-	); err != nil {
-		log.Fatal("Error al migrar la base de datos:", err)
+		&modelsMedicacion.Paciente{}, // Migrar Paciente ANTES que Medicacion
+	)
+	if err == nil {
+		err = db.AutoMigrate(
+			&modelsMedicacion.Medicacion{},
+			&modelsMedicacion.HistorialMedicacion{},
+			&modelsMonitoreo.CuidadorPaciente{},
+		)
 	}
-
-	// 3. Obtener *sql.DB para sqlc (módulo medicación)
-	sqlDB, err := db.DB()
+	
 	if err != nil {
-		log.Fatal("Error obteniendo sql.DB:", err)
+		log.Fatal("❌ Error al migrar la base de datos:", err)
 	}
 
-	// 4. Repositorios
+	// 3. Inyección de dependencias
+	sqlDB, _ := db.DB()
 	almacenMedicacion := storage.NuevoAlmacenSQLC(sqlDB)
 	almacenFarmacia := storageFarmacia.NuevoStorageFarmaciaGORM(db)
 	almacenMonitoreo := storageMonitoreo.NewMonitoreoSQLite(db)
-
-	// 5. Auth
-	usuarioRepo := storage.NuevoAlmacenUsuario()
+	
+	usuarioRepo := storage.NuevoAlmacenUsuario(db)
 	authService := service.NewAuthService(usuarioRepo)
 
-	// 6. Servicios medicación
+	// Servicios
 	medicacionSvc := servicioMedicacion.NewMedicacionService(almacenMedicacion)
 	pacienteSvc := servicioMedicacion.NewPacienteService(almacenMedicacion)
 	historialSvc := servicioMedicacion.NewHistorialService(almacenMedicacion)
 	medicacionHistorialSvc := servicioMedicacion.NewMedicacionHistorialService(almacenMedicacion)
 
-	// 7. Servicios farmacia y monitoreo
 	farmaciaSvc := servicioFarmacia.NuevoServicioFarmacia(almacenFarmacia)
-	monitoreoSvc := servicioMonitoreo.NewMonitoreoService(almacenMonitoreo)
+	monitoreoSvc := servicioMonitoreo.NuevoServicioMonitoreo(almacenMonitoreo)
 
-	// 8. Handlers por módulo
-	medicacionHandler := handlersMedicacion.NewServer(
-		medicacionSvc,
-		pacienteSvc,
-		historialSvc,
-		medicacionHistorialSvc,
-	)
-	farmaciaHandler := handlersFarmacia.NuevoManejadorFarmacia(farmaciaSvc)
-	monitoreoHandler := handlersMonitoreo.NewManejadorMonitoreo(monitoreoSvc)
-
-	// 9. Servidor principal
+	// Handlers
 	servidor := handlers.NewServer(
-		medicacionHandler,
-		farmaciaHandler,
-		monitoreoHandler,
+		handlersMedicacion.NewServer(medicacionSvc, pacienteSvc, historialSvc, medicacionHistorialSvc),
+		handlersFarmacia.NuevoManejadorFarmacia(farmaciaSvc),
+		handlersMonitoreo.NewManejadorMonitoreo(monitoreoSvc),
 		authService,
 	)
 
-	// 10. Router Chi
+	// 4. Rutas
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
@@ -157,6 +139,9 @@ func main() {
 			// Farmacia
 			r.Post("/farmacias", servidor.Farmacia.RegistrarFarmacia)
 			r.Get("/farmacias", servidor.Farmacia.BuscarCercanas)
+			r.Get("/farmacias/{id}", servidor.Farmacia.ObtenerPorID)    
+			r.Put("/farmacias/{id}", servidor.Farmacia.ActualizarFarmacia)
+			r.Delete("/farmacias/{id}", servidor.Farmacia.EliminarFarmacia)
 
 			// Monitoreo
 			r.Get("/relaciones", servidor.Monitoreo.ObtenerRelacionesHandler)

@@ -3,6 +3,7 @@ package handlers
 import (
     "encoding/json"
     "net/http"
+    //"fmt"
 
     "proyecto-medicare-adulto-mayor/internal/response"
     //"proyecto-medicare-adulto-mayor/internal/service"
