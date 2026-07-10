@@ -1,76 +1,124 @@
-# Proyecto MediCare Adulto Mayor
 
-API REST desarrollada en **Go** para la gestión de dos módulos:
-- **Medicaciones** (almacenadas en SQLite con GORM).
-- **Medicamentos de Farmacia** (almacenados en memoria).
-- **Base de Datos:** PostgreSQL
-- **Monitorio familiar o cuidador (almacenados en memoria)
-- **Contenerización:** Docker / Docker-Compose
----
-## Integrantes y Responsabilidades por Módulo
-- **Módulo Medicación:** [Tu Nombre Completo aquí] - `POST /medicaciones`, `GET /medicaciones`
-- **Módulo Medicamento Farmacia:** [Anchundia Acosta Melanie Ariana] - `GET /farmacia/economico`, `POST /farmacia`
-- **Módulo Monitoreo Familiar:** [Nombre de Compañero 3] - `POST /monitoreo/vincular`, `GET /monitoreo`
+# Proyecto: API MediCare Adulto Mayor
 
-## Instalación
-1. Clonar el repositorio:
-   git clone https://github.com/xxmela-anchundiaxx/Proyecto-MediCare-Adulto-Mayor.git
-  
+**Proyecto MediCare Adulto Mayor** es una API REST desarrollada en **Go** que busca apoyar a personas adultas mayores en la gestión de sus medicaciones, considerando que muchas veces olvidan tomarlas. El sistema permite registrar medicamentos, controlar horarios de tratamiento y facilitar la participación de cuidadores en el monitoreo de los pacientes.
 
-
-Descripción general del proyecto
-Proyecto MediCare Adulto Mayor es una API REST desarrollada en Go que busca apoyar a personas adultas mayores en la gestión de sus medicaciones, considerando que muchas veces olvidan tomarlas. El sistema permite registrar medicamentos, controlar horarios de tratamiento y facilitar la participación de cuidadores en el monitoreo de los pacientes.
-
-El proyecto está dividido en tres módulos principales:
-
---MÓDULO MEDICACION
-Este módulo gestiona las medicaciones que debe tomar un paciente.
-Funcionalidad:
-Registrar nuevas medicaciones.
-Consultar medicaciones existentes.
-Actualizar información de dosis y frecuencia.
-Eliminar medicaciones.
-
-
-MÓDULO MEDICAMENTO FARMACIA
-Este módulo gestiona los medicamentos disponibles en farmacias, almacenados en memoria.
-Funcionalidad:
-Registrar medicamentos disponibles en farmacias.
-Consultar lista de medicamentos.
-Filtrar por disponibilidad.
-Obtener el medicamento más económico.
-
-
-MÓDULO MONITOREO FAMILIAR-CUIDADOR
-Este módulo gestiona la relación entre cuidadores y pacientes, permitiendo que los cuidadores participen activamente en el control de las medicaciones.
-Funcionalidad:
-Crear relaciones entre cuidadores y pacientes.
-Consultar todas las relaciones.
-Obtener relación por ID.
-Actualizar o eliminar relaciones.
-
-
-.Objetivo del proyecto
+## Objetivo del proyecto
 El sistema busca ser una herramienta práctica para:
-- Adultos mayores, que necesitan recordar sus medicaciones.
-- Cuidadores y familiares, que pueden monitorear y apoyar en el cumplimiento de los tratamientos.
+- **Adultos mayores:** Que necesitan una forma estructurada de recordar sus medicaciones.
+- **Cuidadores y familiares:** Que pueden monitorear el sistema a distancia y apoyar activamente en el cumplimiento de los tratamientos médicos.
+
+---
+
+## Módulos del Sistema
+
+El proyecto está dividido en tres módulos principales para separar las responsabilidades del negocio:
+
+### 1. Módulo de Medicación
+Este módulo es el núcleo del sistema, encargado de gestionar los tratamientos que debe tomar un paciente y registrar su cumplimiento.
+**Funcionalidades:**
+- Registrar nuevas medicaciones asignadas a un paciente.
+- Consultar medicaciones existentes y el historial médico.
+- Actualizar información de dosis, frecuencia y horarios.
+- Eliminar medicaciones.
+
+### 2. Módulo de Medicamento - Farmacia
+Este módulo gestiona la información de los medicamentos en el mercado y las farmacias donde pueden adquirirse.
+**Funcionalidades:**
+- Registrar medicamentos y farmacias cercanas.
+- Consultar lista de medicamentos.
+- Filtrar información por disponibilidad.
+- Obtener el medicamento más económico.
+
+### 3. Módulo de Monitoreo Familiar - Cuidador
+Este módulo gestiona la relación entre cuidadores (familiares, enfermeros) y pacientes, permitiendo una red de apoyo funcional.
+**Funcionalidades:**
+- Crear relaciones formales entre cuidadores y pacientes.
+- Consultar todas las relaciones registradas.
+- Obtener detalles de una relación por su ID.
+- Actualizar o eliminar relaciones.
+
+---
+
+## Tecnologías Utilizadas
+- **Lenguaje:** Go (Golang)
+- **Base de Datos:** PostgreSQL
+- **Generación de Código SQL:** sqlc
+- **Infraestructura:** Docker y Docker Compose
+
+---
+
+## Instalación y Ejecución Local
+
+1. Clonar el repositorio:
+   ```bash
+   git clone [https://github.com/xxmela-anchundiaxx/Proyecto-MediCare-Adulto-Mayor.git](https://github.com/xxmela-anchundiaxx/Proyecto-MediCare-Adulto-Mayor.git)
 
 
-##  Arquitectura del Sistema
-El proyecto implementa una **Arquitectura Limpia en Capas**, acoplada mediante interfaces e inyección de dependencias desde el punto de entrada principal (`main.go`), estructurada de la siguiente manera:
----`Handler (Controlador HTTP)  Service (Lógica de Negocio/Validaciones) Repository (Persistencia GORM)`
-##  Endpoints Documentados de la API
 
-### 1. Módulo Medicación
-- `POST /api/medicaciones` - Registrar una nueva medicación para un paciente (Valida campos obligatorios y la existencia del paciente).
-- `GET /api/medicaciones` - Consultar todas las medicaciones del sistema y sus relaciones.
+## Equipo de Desarrollo
+- **[ARAY GAÓN Lisbeth Dolores]** - Módulo Medicacion 
+- **[ACOSTA ANCHUNDIA]** -' Módulo Farmacia
+- **[]** - Módulo de Monitoreo Familiar
 
-### 2. Módulo Medicamento Farmacia
-- `POST /api/farmacia/medicamentos` - Registrar medicamentos disponibles en las farmacias.
-- `GET /api/farmacia/medicamentos` - Listar inventario de farmacia (Permite filtrar por disponibilidad).
-- `GET /api/farmacia/medicamentos/economico` - Endpoint de consulta rápida que retorna el medicamento con menor precio registrado.
+## Stack Tecnológico
+- **Lenguaje:** Go 1.x
+- **Arquitectura:** En capas (Handler → Service → Repository)
+- **Persistencia:** GORM con SQLite (para Medicación/Pacientes) y almacenamiento en memoria (para Farmacias/Monitoreo).
+- **Seguridad:** Autenticación centralizada mediante JWT con roles (paciente, cuidador, admin).
+- **Contenedores:** Docker Multi-stage y `docker-compose`.
 
-### 3. Módulo Monitoreo Familiar-Cuidador
-- `POST /api/monitoreo/vincular` - Crear una relación Many-to-Many entre un cuidador y un adulto mayor (paciente).
-- `GET /api/monitoreo/relaciones` - Consultar todas las relaciones de asistencia vigentes.
-- `GET /api/monitoreo/relaciones/{id}` - Obtener los detalles de monitoreo de un cuidador específico por su ID.
+## Ejecución
+Para levantar el sistema completo con todos sus servicios, ejecuta el siguiente comando en la raíz del proyecto:
+```bash
+docker-compose up --build
+
+
+
+## Endpoints de la API
+
+La API está protegida mediante autenticación JWT. Todas las rutas dentro del grupo protegido requieren un token válido en el header `Authorization: Bearer <token>`.
+
+### 1. Autenticación (Público)
+- `POST /auth/registrar`: Registro de nuevos usuarios (paciente/cuidador).
+- `POST /auth/login`: Autenticación para obtener token de acceso.
+
+### 2. Módulo de Medicación y Pacientes (Protegido)
+**Medicaciones:**
+- `GET /medicaciones`: Lista todas las medicaciones.
+- `POST /medicaciones`: Registra nueva medicación.
+- `GET /medicaciones/{id}`: Obtiene detalle de una medicación.
+- `PUT /medicaciones/{id}`: Actualiza medicación.
+- `DELETE /medicaciones/{id}`: Elimina medicación.
+
+**Pacientes:**
+- `GET /pacientes`: Lista todos los pacientes.
+- `POST /pacientes`: Registra un nuevo paciente.
+- `GET /pacientes/{id}`: Obtiene datos de un paciente.
+- `PUT /pacientes/{id}`: Actualiza datos del paciente.
+- `DELETE /pacientes/{id}`: Elimina un paciente.
+
+**Historial:**
+- `GET /historial`: Lista todo el historial de tomas.
+- `POST /historial`: Registra una entrada en el historial.
+- `GET /historial/{id}`: Busca registro de historial por ID.
+- `PUT /historial/{id}`: Actualiza registro de historial.
+- `DELETE /historial/{id}`: Elimina registro de historial.
+
+**Consultas Cruzadas:**
+- `GET /pacientes/{id}/medicaciones`: Lista medicaciones de un paciente específico.
+- `GET /pacientes/{id}/historial`: Lista historial de un paciente específico.
+
+### 3. Módulo de Farmacias (Protegido)
+- `POST /farmacias`: Registra una nueva farmacia.
+- `GET /farmacias`: Busca farmacias (cercanas).
+- `GET /farmacias/{id}`: Obtiene detalles de una farmacia.
+- `PUT /farmacias/{id}`: Actualiza datos de farmacia.
+- `DELETE /farmacias/{id}`: Elimina una farmacia.
+
+### 4. Módulo de Monitoreo (Protegido)
+- `POST /relaciones`: Crea relación cuidador-paciente.
+- `GET /relaciones`: Lista todas las relaciones.
+- `GET /relaciones/{id}`: Obtiene relación por ID.
+- `PUT /relaciones/{id}`: Actualiza relación.
+- `DELETE /relaciones/{id}`: Elimina relación.
